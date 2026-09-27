@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="description" content="Melbourne Mystery Drive — 随机生成一个今晚就能出发的自驾挑战。" />
+  <title>Melbourne Mystery Drive</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <main class="shell">
+    <header class="hero">
+      <div class="eyebrow">MELBOURNE · DRIVE ROULETTE</div>
+      <h1>Mystery Drive</h1>
+      <p>不知道去哪？按一下。今晚的路线交给随机数。</p>
+    </header>
+
+    <section class="controls" aria-label="模式筛选">
+      <div class="mode-group" id="modeGroup">
+        <button class="chip active" data-mode="any">随便来</button>
+        <button class="chip" data-mode="night">深夜</button>
+        <button class="chip" data-mode="weekend">周末</button>
+        <button class="chip" data-mode="rain">雨天</button>
+        <button class="chip" data-mode="short">短途</button>
+      </div>
+      <button id="rollButton" class="roll-button" type="button">
+        <span class="roll-icon">↻</span>
+        抽一条路线
+      </button>
+    </section>
+
+    <section id="missionCard" class="mission-card" aria-live="polite">
+      <div class="card-topline">
+        <span id="missionTag" class="tag">等待抽取</span>
+        <span id="missionCode" class="code">#000000</span>
+      </div>
+      <h2 id="destination">今晚去哪？</h2>
+      <p id="subtitle" class="subtitle">点“抽一条路线”，随机生成目的地和挑战。</p>
+
+      <div class="metrics">
+        <div class="metric">
+          <span>预计驾驶</span>
+          <strong id="duration">—</strong>
+        </div>
+        <div class="metric">
+          <span>预算</span>
+          <strong id="budget">—</strong>
+        </div>
+        <div class="metric">
+          <span>氛围</span>
+          <strong id="vibe">—</strong>
+        </div>
+      </div>
+
+      <div class="challenge-grid">
+        <article>
+          <span class="label">主任务</span>
+          <p id="challenge">—</p>
+        </article>
+        <article>
+          <span class="label">隐藏规则</span>
+          <p id="rule">—</p>
+        </article>
+        <article>
+          <span class="label">车内任务</span>
+          <p id="carTask">—</p>
+        </article>
+        <article>
+          <span class="label">返程条件</span>
+          <p id="returnRule">—</p>
+        </article>
+      </div>
+
+      <div class="card-actions">
+        <button id="copyButton" class="ghost-button" type="button" disabled>复制挑战</button>
+        <button id="saveButton" class="ghost-button" type="button" disabled>收藏这条</button>
+      </div>
+    </section>
+
+    <section class="history-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">YOUR GARAGE LOG</div>
+          <h3>最近抽到的路线</h3>
+        </div>
+        <button id="clearHistory" class="text-button" type="button">清空</button>
+      </div>
+      <div id="history" class="history empty">还没有记录。</div>
+    </section>
+
+    <footer>
+      <span>Made for indecisive drivers.</span>
+      <span>所有路线仅作灵感，出发前自行确认道路、天气和营业状态。</span>
+    </footer>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

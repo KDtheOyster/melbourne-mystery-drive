@@ -1,0 +1,10 @@
+{
+  "name": "Melbourne Mystery Drive",
+  "short_name": "Mystery Drive",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080b0f",
+  "theme_color": "#0b0f14",
+  "description": "随机生成墨尔本周边自驾挑战。",
+  "icons": [{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
