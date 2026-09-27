@@ -1,4 +1,4 @@
-name: Deploy static site to Pages
+name: Validate and deploy site
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -15,20 +16,80 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate static app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f style.css
+          test -f app.js
+          test -f sw.js
+          test -f manifest.webmanifest
+          test -f assets/icon.svg
+          node --check app.js
+          node --check sw.js
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
+          grep -q 'app.js' index.html
+          grep -q 'style.css' index.html
+          echo "Static app validation passed."
+
+      - name: Check GitHub Pages configuration
+        id: pages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -L -o /tmp/pages.json -w '%{http_code}'             -H 'Accept: application/vnd.github+json'             -H "Authorization: Bearer $GH_TOKEN"             -H 'X-GitHub-Api-Version: 2026-03-10'             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pages")"
+
+          if [ "$code" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "GitHub Pages is enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Deployment not attempted"
+              echo
+              echo "The website files are valid, but GitHub Pages is not enabled for this repository."
+              echo "Open **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**."
+              echo "Then re-run this workflow."
+              echo
+              echo "GitHub Pages API returned HTTP $code."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Pages is not enabled yet. Validation passed; deployment was skipped."
+          fi
+
   deploy:
+    needs: validate
+    if: needs.validate.outputs.pages_enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
